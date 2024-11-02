@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ExternalApiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\WalletController;
+use App\Http\Controllers\SearchController;
 
 // Rotas de Autenticação
 Route::post('/register', [AuthController::class, 'register']);
@@ -25,3 +26,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Rota para consumir API externa
 Route::get('/external-api', [ExternalApiController::class, 'getData']);
+Route::get('/cryptos/suggestions', [SearchController::class, 'getSuggestions']);
