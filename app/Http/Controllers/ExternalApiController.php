@@ -33,4 +33,37 @@ class ExternalApiController extends Controller
             'status' => $response->status()
         ], 500);
     }
+
+    public function getAllCoins()
+    {
+        $apiUrl = 'https://api.coingecko.com/api/v3/coins/list?include_platform=false';
+        
+        // Faz a requisição para a API da CoinGecko
+        $response = Http::get($apiUrl);
+
+        if ($response->successful()) {
+            return response()->json($response->json());
+        }
+
+        return response()->json([
+            'error' => 'Erro ao consumir API externa',
+            'status' => $response->status()
+        ], 500);
+    }
+
+    public function getBitcoinMarketData()
+    {
+        $url = 'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart';
+        
+        $response = Http::get($url, [
+            'vs_currency' => 'usd',
+            'days' => 30,
+        ]);
+
+        if ($response->successful()) {
+            return response()->json($response->json());
+        }
+
+        return response()->json(['error' => 'Failed to fetch data'], 500);
+    }
 }

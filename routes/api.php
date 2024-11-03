@@ -25,5 +25,6 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Rota para consumir API externa
-Route::get('/external-api', [ExternalApiController::class, 'getData']);
+Route::get('/coins/all', [ExternalApiController::class, 'getAllCoins']);
 Route::get('/cryptos/suggestions', [SearchController::class, 'getSuggestions']);
+Route::get('/bitcoin-market-data', [ExternalApiController::class, 'getBitcoinMarketData']);
