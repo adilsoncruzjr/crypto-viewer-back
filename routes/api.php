@@ -30,3 +30,5 @@ Route::get('/cryptos/suggestions', [SearchController::class, 'getSuggestions']);
 Route::get('/bitcoin-market-data', [ExternalApiController::class, 'getBitcoinMarketData']);
 Route::post('/wallet/{id}/add-coins', [WalletController::class, 'addCoins']);
 Route::get('/wallet/{id}/coins', [WalletController::class, 'getCoins']);
+Route::delete('/wallet/{id}/coin', [WalletController::class, 'deleteCoin']);
+

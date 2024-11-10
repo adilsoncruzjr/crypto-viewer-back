@@ -54,4 +54,34 @@ public function getCoins($userId)
 
     return response()->json($coins, 200);
 }
+
+public function deleteCoin($id, Request $request)
+{
+    // Encontrar o usuário
+    $user = User::findOrFail($id);
+    
+    // Obter a carteira do usuário
+    $wallet = $user->wallet;
+    
+    // Decodificar o JSON para array
+    $coins = json_decode($wallet->coins, true) ?: [];
+    
+    // Obter o nome da moeda a ser removida
+    $coinName = $request->input('coin_name');
+    
+    // Procurar a moeda e removê-la
+    $coins = array_filter($coins, function($coin) use ($coinName) {
+        return $coin['name'] !== $coinName;
+    });
+    
+    // Re-indexar o array para garantir índices contínuos
+    $coins = array_values($coins);
+    
+    // Atualizar a carteira com as moedas restantes
+    $wallet->coins = json_encode($coins);
+    $wallet->save();
+
+    return response()->json(['message' => 'Moeda removida com sucesso'], 200);
+}
+
 }
