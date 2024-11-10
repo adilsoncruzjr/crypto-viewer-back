@@ -27,8 +27,10 @@ Route::middleware('auth:sanctum')->group(function () {
 // Rota para consumir API externa
 Route::get('/coins/all', [ExternalApiController::class, 'getAllCoins']);
 Route::get('/cryptos/suggestions', [SearchController::class, 'getSuggestions']);
-Route::get('/bitcoin-market-data', [ExternalApiController::class, 'getBitcoinMarketData']);
+Route::get('/coin-market-data/{coinId}', [ExternalApiController::class, 'getMarketData']);
 Route::post('/wallet/{id}/add-coins', [WalletController::class, 'addCoins']);
 Route::get('/wallet/{id}/coins', [WalletController::class, 'getCoins']);
-Route::delete('/wallet/{id}/coin', [WalletController::class, 'deleteCoin']);
+Route::delete('/wallet/{userId}/coin', [WalletController::class, 'deleteCoin']);
+
+
 

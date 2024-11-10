@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
+
 
 
 class WalletController extends Controller
@@ -14,6 +16,7 @@ class WalletController extends Controller
 {
     $user = User::findOrFail($id);
     $coinName = $request->input('coin_name');  // Nome da moeda
+    $coinId = $request->input('coin_id');  // ID da moeda
 
     // Obtém a carteira do usuário
     $wallet = $user->wallet;
@@ -21,8 +24,11 @@ class WalletController extends Controller
     // Se já existir moedas salvas, decodifique para array, caso contrário, crie um novo array
     $coins = json_decode($wallet->coins, true) ?: [];
 
-    // Adiciona o nome da moeda
-    $coins[] = ['name' => $coinName];
+    // Adiciona a moeda com o nome e o ID
+    $coins[] = [
+        'name' => $coinName,
+        'id' => $coinId,  // Salva o ID da moeda também
+    ];
 
     // Salva o array de moedas como string JSON
     $wallet->coins = json_encode($coins);
@@ -40,16 +46,19 @@ public function getCoins($userId)
     $wallet = $user->wallet;
 
     // Se o campo 'coins' for uma string JSON, converta para array
-    $coins = json_decode($wallet->coins, true);
+    $coins = json_decode($wallet->coins, true) ?: [];
 
     // Se a conversão falhar, retornamos um erro
     if (json_last_error() !== JSON_ERROR_NONE) {
         return response()->json(['error' => 'Erro ao processar as moedas'], 500);
     }
 
-    // Retorna apenas o nome das moedas (removendo o 'value')
+    // Retorna tanto o nome quanto o id das moedas
     $coins = array_map(function($coin) {
-        return ['name' => $coin['name']];
+        return [
+            'name' => $coin['name'],   // Nome da moeda
+            'id' => $coin['id']        // ID da moeda (agora incluído)
+        ];
     }, $coins);
 
     return response()->json($coins, 200);
@@ -57,27 +66,27 @@ public function getCoins($userId)
 
 public function deleteCoin($id, Request $request)
 {
-    // Encontrar o usuário
-    $user = User::findOrFail($id);
-    
-    // Obter a carteira do usuário
-    $wallet = $user->wallet;
-    
-    // Decodificar o JSON para array
-    $coins = json_decode($wallet->coins, true) ?: [];
-    
-    // Obter o nome da moeda a ser removida
+    // Verifique se o nome da moeda foi passado corretamente
     $coinName = $request->input('coin_name');
-    
-    // Procurar a moeda e removê-la
+
+    if (!$coinName) {
+        return response()->json(['error' => 'O nome da moeda não foi fornecido.'], 400);
+    }
+
+    // Continuar com o restante do código
+    $user = User::findOrFail($id);
+    $wallet = $user->wallet;
+    $coins = json_decode($wallet->coins, true) ?: [];
+
+    // Filtrando e removendo a moeda
     $coins = array_filter($coins, function($coin) use ($coinName) {
         return $coin['name'] !== $coinName;
     });
-    
-    // Re-indexar o array para garantir índices contínuos
+
+    // Reindexando o array para manter os índices contíguos
     $coins = array_values($coins);
-    
-    // Atualizar a carteira com as moedas restantes
+
+    // Atualizando a carteira do usuário
     $wallet->coins = json_encode($coins);
     $wallet->save();
 
