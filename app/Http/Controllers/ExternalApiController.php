@@ -52,37 +52,24 @@ class ExternalApiController extends Controller
         ], 500);
     }
 
-    public function getMarketData($coinId)
-{
-    // Log para saber qual ID da moeda está sendo buscado
-    Log::info('Buscando dados de mercado para a moeda com ID:', ['coin_id' => $coinId]);
-
-    // URL da API externa para obter os dados de mercado
-    $url = "https://api.coingecko.com/api/v3/coins/{$coinId}/market_chart";
+    public function getMarketData(Request $request, $coinId)
+    {
+        $days = $request->query('days', 30); // Pega o parâmetro days, padrão 30
+        Log::info('Buscando dados de mercado para a moeda com ID:', ['coin_id' => $coinId, 'days' => $days]);
     
-    // Log da URL da requisição
-    Log::info('Requisitando dados de mercado na API externa:', ['url' => $url]);
+        $url = "https://api.coingecko.com/api/v3/coins/{$coinId}/market_chart?vs_currency=usd&days={$days}";
     
-    // Realizando a requisição GET para a API
-    $response = Http::get($url, [
-        'vs_currency' => 'usd',  // Moeda de referência
-        'days' => 365,           // Período de tempo (últimos 365 dias)
-    ]);
-
-    // Verifica se a resposta foi bem-sucedida
-    if ($response->successful()) {
-        // Log dos dados recebidos da API
-        Log::info('Resposta da API recebida com sucesso:', ['data' => $response->json()]);
-
-        // Retorna os dados obtidos
-        return response()->json($response->json());
+        Log::info('Requisitando dados de mercado na API externa:', ['url' => $url]);
+    
+        $response = Http::get($url);
+    
+        if ($response->successful()) {
+            Log::info('Resposta da API recebida com sucesso:', ['data' => $response->json()]);
+            return response()->json($response->json());
+        }
+    
+        Log::error('Falha ao obter dados da API:', ['error' => $response->body()]);
+        return response()->json(['error' => 'Failed to fetch data'], 500);
     }
-
-    // Caso ocorra um erro, loga o erro
-    Log::error('Falha ao obter dados da API:', ['error' => $response->body()]);
-
-    // Retorna uma resposta de erro
-    return response()->json(['error' => 'Failed to fetch data'], 500);
-}
 
 }

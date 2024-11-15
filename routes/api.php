@@ -7,6 +7,7 @@ use App\Http\Controllers\ExternalApiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\SearchController;
+use App\Models\User;
 
 // Rotas de Autenticação
 Route::post('/register', [AuthController::class, 'register']);
@@ -31,6 +32,15 @@ Route::get('/coin-market-data/{coinId}', [ExternalApiController::class, 'getMark
 Route::post('/wallet/{id}/add-coins', [WalletController::class, 'addCoins']);
 Route::get('/wallet/{id}/coins', [WalletController::class, 'getCoins']);
 Route::delete('/wallet/{userId}/coin', [WalletController::class, 'deleteCoin']);
+Route::get('/check-email', function (Request $request) {
+    $email = $request->query('email');
+    $user = User::where('email', $email)->first();
 
+    if ($user) {
+        return response()->json(['message' => 'Email already in use'], 409);
+    }
+
+    return response()->json(['message' => 'Email available'], 200);
+});
 
 

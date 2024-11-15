@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Wallet;
+use App\Models\Users;
 
 
 class AuthController extends Controller
@@ -22,6 +23,14 @@ class AuthController extends Controller
             'email' => 'required|string|email|unique:users',
             'password' => 'required|string|confirmed',
         ]);
+
+        $emailExists = User::where('email', $validated['email'])->exists();
+
+        if ($emailExists) {
+            // Retorna um erro se o e-mail já estiver cadastrado
+            return response()->json(['error' => 'Este e-mail já está em uso.'], 409);
+        }
+
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
